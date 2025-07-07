@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบออกเอกสาร - บจก. แหลมทองกิจ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --dark-green: #004d40; --dark-green-shadow: #002d24;
+            --brown: #5d4037; --brown-shadow: #3e2723;
+            --yellow: #ffc107; --yellow-shadow: #b38600;
+            --gray: #757575; --gray-shadow: #424242;
+            --light-gray: #f7f9fc; --text-color: #212529;
+            --border-color: #dee2e6; --card-bg: #ffffff;
+            --card-shadow: 0 4px 25px rgba(0, 0, 0, 0.05);
+        }
+        body {
+            font-family: 'Sarabun', sans-serif; background-color: var(--light-gray);
+            color: var(--text-color); margin: 0; padding: 0; line-height: 1.7;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+        .page-wrapper { max-width: 960px; margin: 20px auto; padding: 15px; }
+        .card {
+            background-color: var(--card-bg); border-radius: 12px;
+            box-shadow: var(--card-shadow); margin-bottom: 25px; padding: 25px;
+        }
+        .card-header { text-align: center; }
+        .card-header img { max-width: 120px; margin-bottom: 15px; }
+        .card-header h1 { font-size: 2rem; font-weight: 700; margin: 0 0 5px 0; color: var(--dark-green); }
+        .card-header p { color: #6c757d; font-size: 1.1rem; margin: 0; }
+        .company-details {
+            border-top: 1px solid var(--border-color); margin-top: 20px;
+            padding-top: 20px; font-size: 1rem; color: #495057;
+        }
+        .btn {
+            display: inline-block; font-family: 'Sarabun', sans-serif;
+            font-weight: 700; font-size: 1.1rem; color: white;
+            text-align: center; vertical-align: middle; cursor: pointer;
+            border: none; padding: 12px 28px; border-radius: 8px;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+        }
+        .btn:active { transform: translateY(2px); }
+        .btn-green { background-color: var(--dark-green); box-shadow: 0 4px 0 0 var(--dark-green-shadow); }
+        .btn-green:active { box-shadow: 0 2px 0 0 var(--dark-green-shadow); }
+        .btn-brown { background-color: var(--brown); box-shadow: 0 4px 0 0 var(--brown-shadow); }
+        .btn-brown:active { box-shadow: 0 2px 0 0 var(--brown-shadow); }
+        .btn-gray { background-color: var(--gray); box-shadow: 0 4px 0 0 var(--gray-shadow); }
+        .btn-gray:active { box-shadow: 0 2px 0 0 var(--gray-shadow); }
+        .btn-yellow { background-color: var(--yellow); color: var(--brown); box-shadow: 0 4px 0 0 var(--yellow-shadow); text-shadow: none; }
+        .btn-yellow:active { box-shadow: 0 2px 0 0 var(--yellow-shadow); }
+        .action-buttons { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        #form-container { display: none; }
+        #form-container h2 { text-align: center; font-size: 1.8rem; margin-bottom: 25px; }
+        .form-section-title {
+            font-size: 1.3rem; font-weight: 700; color: var(--brown);
+            margin: 0 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid var(--border-color);
+        }
+        .form-grid { display: grid; grid-template-columns: 150px 1fr; gap: 20px; align-items: center; }
+        .form-grid label { font-weight: 500; text-align: right; color: #495057; }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
+            border-radius: 6px; box-sizing: border-box; font-family: 'Sarabun', sans-serif;
+            font-size: 1rem; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+            border-color: var(--dark-green); box-shadow: 0 0 0 3px rgba(0, 77, 64, 0.15); outline: none;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        .table-responsive-wrapper { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+        #items-table { width: 100%; min-width: 800px; border-collapse: collapse; }
+        #items-table th, #items-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        #items-table tr:last-child td { border-bottom: none; }
+        #items-table th { background-color: #f8f9fa; color: var(--dark-green); font-weight: 700; }
+        #items-table input, #items-table select { width: 95%; }
+        #items-table .number-cell { text-align: right; }
+        .total-cell { font-weight: 700; text-align: right; }
+        .delete-btn { background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .summary-section { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .totals-display table { width: 100%; }
+        .totals-display td { padding: 8px 0; }
+        .totals-display td:last-child { text-align: right; font-weight: 700; }
+        .grand-total td { font-size: 1.5rem; color: var(--dark-green); border-top: 2px solid var(--dark-green); padding-top: 10px; }
+        .final-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-top: 30px; }
+        .final-actions .btn { width: 100%; }
+        @media (max-width: 768px) {
+            .page-wrapper { margin: 0 auto; padding: 10px; }
+            .card { padding: 20px; }
+            .card-header h1 { font-size: 1.5rem; }
+            .form-grid { grid-template-columns: 1fr; gap: 10px; }
+            .form-grid label { text-align: left; margin-bottom: 2px; }
+            .summary-section { grid-template-columns: 1fr; }
+            .final-actions { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 600px) {
+            .table-responsive-wrapper {
+                overflow-x: unset;
+                border: none;
+            }
+            #items-table, #items-table thead, #items-table tbody, #items-table tr, #items-table th, #items-table td {
+                display: block;
+                width: 100%;
+            }
+            #items-table thead {
+                display: none;
+            }
+            #items-table tr {
+                margin-bottom: 12px;
+                border: 1px solid #e0e0e0;
+                background: #f9f9f9;
+                border-radius: 10px;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+                padding: 8px 0;
+            }
+            #items-table td {
+                padding: 6px 10px;
+                text-align: left;
+                position: relative;
+            }
+            #items-table td:before {
+                content: attr(data-label);
+                font-weight: 500;
+                color: #888;
+                display: block;
+                margin-bottom: 2px;
+                font-size: 0.92em;
+            }
+            #items-table .delete-btn {
+                width: 100%;
+                margin-top: 8px;
+            }
+            .btn, .delete-btn {
+                font-size: 1.1em;
+                padding: 14px 0;
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            input, select, textarea {
+                font-size: 1.1em;
+                padding: 12px 10px;
+            }
+        }
+        #pdf-template {
+            display: none; width: 210mm; min-height: 297mm; padding: 15mm;
+            box-sizing: border-box; background-color: white; color: #333;
+            font-family: 'Sarabun', sans-serif; font-size: 10pt;
+        }
+        .pdf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(90deg, #004d40 0%, #009688 100%);
+            border-radius: 18px 18px 0 0;
+            box-shadow: 0 4px 16px rgba(0,77,64,0.10);
+            padding: 18px 24px 12px 24px;
+            margin-bottom: 0;
+            color: #fff;
+            position: relative;
+        }
+        .pdf-header::after {
+            content: "";
+            display: block;
+            position: absolute;
+            left: 24px; right: 24px; bottom: 0;
+            height: 5px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            opacity: 0.7;
+        }
+        .pdf-logo {
+            width: 100px; height: 100px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,77,64,0.15);
+            background: #fff;
+            padding: 10px;
+            object-fit: contain;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        .pdf-company-info {
+            text-align: right;
+            color: #fff;
+        }
+        .pdf-company-info h2 {
+            margin: 0;
+            font-size: 2em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0,77,64,0.18);
+        }
+        .pdf-company-info p {
+            margin: 2px 0;
+            font-size: 1em;
+            color: #e0f2f1;
+        }
+        .pdf-doc-title {
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: bold;
+            color: #fff;
+            margin: 24px 0 18px 0;
+            padding: 12px 0;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #00796b 0%, #43e97b 100%);
+            text-shadow: 0 2px 8px rgba(0,77,64,0.18);
+            box-shadow: 0 3px 12px rgba(0,77,64,0.10);
+            letter-spacing: 1px;
+            border-bottom: 4px solid #38f9d7;
+        }
+        .pdf-customer-info-grid {
+            display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #e0e0e0;
+            background-color: #f9f9f9; border-radius: 5px; padding: 15px;
+            margin-bottom: 20px; gap: 5px 15px;
+        }
+        .pdf-customer-info-grid p { margin: 0; }
+        .pdf-customer-info-grid strong { color: var(--brown); }
+        .pdf-items-table {
+            width: 100%; border-collapse: collapse; font-size: 0.9em;
+            border-radius: 8px; overflow: hidden; border: 1px solid #ddd;
+        }
+        .pdf-items-table th, .pdf-items-table td { border-bottom: 1px solid #ddd; padding: 10px; vertical-align: top; }
+        .pdf-items-table th { border-bottom-width: 2px; }
+        .pdf-items-table td { border-left: 1px solid #eee; }
+        .pdf-items-table td:first-child { border-left: none; }
+        .pdf-items-table thead tr { background-color: var(--brown); color: white; text-align: center; }
+        .pdf-items-table thead th:first-child { text-align: left; }
+        .pdf-items-table tbody tr:nth-child(even) { background-color: #fdfaf8; }
+        .pdf-items-table tfoot { font-weight: bold; color: var(--brown); }
+        .pdf-items-table tfoot td { text-align: right; padding: 8px 10px; }
+        .pdf-items-table tfoot tr { border-top: 1px solid #ddd; }
+        .pdf-items-table tfoot tr.grand-total-pdf td { font-size: 1.4em; color: white; background-color: var(--dark-green); }
+        .pdf-items-table td:nth-child(2), .pdf-items-table td:nth-child(4), .pdf-items-table td:nth-child(5), .pdf-items-table td:nth-child(6) { text-align: right; }
+        .pdf-footer { 
+            margin-top: 40px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            page-break-inside: avoid;
+            gap: 20px;
+        }
+        .pdf-payment-info { 
+            border: 2px solid var(--yellow); 
+            padding: 20px; 
+            border-radius: 12px; 
+            background-color: #fffbeb; 
+            text-align: center;
+            min-width: 250px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        .pdf-qr-code { 
+            width: 200px; 
+            height: 200px; 
+            object-fit: contain;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .pdf-signature-area { 
+            width: 35%; 
+            padding-top: 40px; 
+            text-align: center;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .signature-line { border-top: 1px solid #555; margin: 0 20px 5px 20px; }
+        /* เพิ่ม CSS สำหรับ Card UI */
+        .item-card {
+          background: #f9f9f9;
+          border: 1px solid #e0e0e0;
+          border-radius: 12px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+          margin-bottom: 16px;
+          padding: 16px 12px 8px 12px;
+        }
+        .item-card-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 10px;
+        }
+        /* ปรับช่องกรอก รายการสินค้า ให้กว้างเต็มแถว */
+        .item-card-row.item-name-row {
+          flex-direction: row;
+          align-items: flex-start;
+        }
+        .item-card-row.item-name-row label {
+          min-width: 90px;
+          margin-top: 8px;
+        }
+        .item-card-row.item-name-row .item-name {
+          flex: 1 1 0%;
+          width: 100%;
+          max-width: 100%;
+        }
+        .item-card-row label {
+          min-width: 80px;
+          font-weight: 500;
+          color: #6c757d;
+        }
+        .item-card-row input, .item-card-row select {
+          flex: 1 1 100px;
+          padding: 8px 10px;
+          border: 1px solid #dee2e6;
+          border-radius: 6px;
+          font-size: 1em;
+        }
+        .item-card-row .item-total {
+          font-weight: 700;
+          color: var(--dark-green);
+          font-size: 1.1em;
+          margin-right: 10px;
+        }
+        .item-card-row .delete-btn {
+          background: #dc3545;
+          color: #fff;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 16px;
+          cursor: pointer;
+          font-size: 1em;
+          margin-left: auto;
+        }
+        .item-card-total-row {
+          justify-content: flex-end;
+          gap: 16px;
+        }
+        /* ปรับ layout จำนวน/หน่วย/ราคา/หน่วย/ส่วนลด */
+        .item-card-row.item-qty-row {
+          display: grid;
+          grid-template-columns: 80px 100px 120px 100px;
+          gap: 10px;
+        }
+        .item-card-row.item-qty-row label {
+          display: none;
+        }
+        .item-card-row.item-qty-row .item-qty {
+          width: 100%;
+        }
+        .item-card-row.item-qty-row .item-unit {
+          width: 100%;
+        }
+        .item-card-row.item-qty-row .item-price {
+          width: 100%;
+        }
+        .item-card-row.item-qty-row .item-discount {
+          width: 100%;
+        }
+        .item-card-row.item-qty-row .input-label {
+          font-size: 0.95em;
+          color: #888;
+          margin-bottom: 2px;
+          display: block;
+        }
+        @media (max-width: 600px) {
+          .item-card {
+            padding: 12px 6px 6px 6px;
+          }
+          .item-card-row {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 4px;
+          }
+          .item-card-row.item-name-row {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .item-card-row.item-name-row label {
+            margin-bottom: 2px;
+            margin-top: 0;
+          }
+          .item-card-row.item-name-row .item-name {
+            width: 100%;
+            min-width: 0;
+          }
+          .item-card-row label {
+            min-width: unset;
+            font-size: 0.98em;
+          }
+          .item-card-row input, .item-card-row select {
+            width: 100%;
+            font-size: 1.08em;
+          }
+          .item-card-row .delete-btn {
+            width: 100%;
+            margin-left: 0;
+            margin-top: 6px;
+          }
+          .item-card-row .item-total {
+            margin-right: 0;
+          }
+          .item-card-row.item-qty-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 8px;
+            margin-bottom: 8px;
+          }
+          .item-card-row.item-qty-row label {
+            display: none;
+          }
+          .item-card-row.item-qty-row .input-label {
+            display: block;
+            font-size: 0.97em;
+            color: #888;
+            margin-bottom: 2px;
+          }
+          .item-card-row.item-qty-row input,
+          .item-card-row.item-qty-row select {
+            width: 100%;
+            font-size: 1.08em;
+          }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+        <!-- Initial Page -->
+        <div id="initial-page">
+            <div class="card">
+                <div class="card-header">
+                    <img src="https://img5.pic.in.th/file/secure-sv1/cd885ba06f0ea0fe9fd7e14443ff886d.md.png" alt="Company Logo">
+                    <h1>ระบบออกเอกสาร</h1>
+                    <p>บจก. แหลมทองกิจเกษตร</p>
+                </div>
+                <div class="company-details">
+                    <p><strong>ที่อยู่:</strong> 298 หมู่ 2  ต.พรุเตียว อ.เขาพนม จ.กระบี่ 81140</p>
+                    <p><strong>เลขประจำตัวผู้เสียภาษี:</strong> 0815565002748</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-green">ใบเสนอราคา</button>
+                    <button class="btn btn-green">บิลเงินสด</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Page -->
+        <div id="form-container">
+            <h2 id="doc-title"></h2>
+            <div class="card">
+                <h3 class="form-section-title">ข้อมูลลูกค้า</h3>
+                <div class="form-grid">
+                    <label for="document-number">เลขที่เอกสาร:</label>
+                    <input type="text" id="document-number" readonly style="background:#f3f3f3; color:#888;">
+                    <label for="customer-name">ชื่อ/บริษัท:</label>
+                    <input type="text" id="customer-name" placeholder="ชื่อลูกค้า">
+                    <label for="customer-address">ที่อยู่:</label>
+                    <textarea id="customer-address" rows="3" placeholder="ที่อยู่สำหรับออกใบกำกับภาษี"></textarea>
+                    <label for="customer-tax-id">เลขผู้เสียภาษี:</label>
+                    <input type="text" id="customer-tax-id" placeholder="13 หลัก (ถ้ามี)">
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="form-section-title">QR Code PromptPay</h3>
+                <div class="form-grid">
+                    <label for="qr-code-image">รูปภาพ QR Code:</label>
+                    <input type="file" id="qr-code-image" accept="image/*" style="padding: 8px;">
+                    </select>
+                </div>
+                <div id="qr-preview" style="margin-top: 15px; text-align: center; display: none;">
+                    <img id="qr-preview-img" style="width: 250px; height: 250px; object-fit: contain; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 3px solid #e0e0e0; background: white; padding: 12px;">
+                    <p style="margin-top: 12px; font-size: 1em; color: #666; font-weight: 500;">QR Code ที่เลือก (ขนาดจริงที่ใช้ใน PDF)</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="form-section-title">โลโก้บริษัท (สำหรับ PDF)</h3>
+                <div class="form-grid">
+                    <label for="logo-upload">อัปโหลดโลโก้:</label>
+                    <input type="file" id="logo-upload" accept="image/*" style="padding: 8px;">
+                </div>
+                <div id="logo-preview" style="margin-top: 15px; text-align: center; display: none;">
+                    <img id="preview-logo-img" style="max-width: 120px; max-height: 120px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #e0e0e0; background: white; padding: 8px;">
+                    <p style="margin-top: 8px; font-size: 0.9em; color: #666;">โลโก้ที่จะแสดงใน PDF</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="form-section-title">รายการสินค้าและบริการ</h3>
+                <div id="items-list"></div>
+                <button id="add-item-btn" class="btn btn-yellow" style="margin-top: 20px; width:100%;">+ เพิ่มรายการ</button>
+            </div>
+            <div class="summary-section">
+                <div class="card discount-inputs">
+                    <h3 class="form-section-title">ส่วนลดท้ายบิล</h3>
+                    <div class="form-grid">
+                        <label for="discount-amount">ส่วนลด (บาท):</label>
+                        <input type="number" id="discount-amount" placeholder="0.00" min="0" step="any">
+                        <label for="discount-percent">ส่วนลด (%):</label>
+                        <input type="number" id="discount-percent" placeholder="0" min="0" max="100" step="any">
+                    </div>
+                </div>
+                <div class="card totals-display">
+                    <h3 class="form-section-title">สรุปยอด</h3>
+                    <table>
+                        <tbody>
+                            <tr><td>ราคารวม</td><td id="summary-subtotal">0.00</td></tr>
+                            <tr><td>ส่วนลดท้ายบิล</td><td id="summary-discount">0.00</td></tr>
+                            <tr><td>ยอดหลังหักส่วนลด</td><td id="summary-pre-tax-total">0.00</td></tr>
+                            <tr><td>ภาษีมูลค่าเพิ่ม 7%</td><td id="summary-vat">0.00</td></tr>
+                            <tr class="grand-total"><td>ยอดชำระทั้งสิ้น</td><td id="summary-grand-total">0.00</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="final-actions">
+                <button id="back-to-main-btn" class="btn btn-gray">กลับหน้าหลัก</button>
+                <button id="save-pdf-btn" class="btn btn-brown">สร้าง PDF และส่ง Telegram</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Template (Hidden) -->
+    <div id="pdf-template">
+        <header class="pdf-header">
+            <img id="pdf-logo-img" class="pdf-logo" src="" alt="Logo">
+            <div class="pdf-company-info">
+                <h2>บจก. แหลมทองกิจเกษตร</h2>
+                <p>298 หมู่ 2 ต.พรุเตียว อ.เขาพนม จ.กระบี่ 81140</p>
+                <p>โทร: 062-2924456</p><p>เลขประจำตัวผู้เสียภาษี: 0815565002748</p><p>สาขาที่ออกใบกำกับภาษี: สาขา 2 (พรุเตียว)</p>
+            </div>
+        </header>
+        <h1 class="pdf-doc-title" id="pdf-doc-title-render"></h1>
+        <div class="pdf-customer-info-grid">
+             <p><strong>เลขที่เอกสาร:</strong> <span id="pdf-document-number"></span></p>
+             <p><strong>ลูกค้า:</strong> <span id="pdf-customer-name"></span></p>
+             <p><strong>วันที่:</strong> <span id="pdf-doc-date"></span></p>
+             <p><strong>ที่อยู่:</strong> <span id="pdf-customer-address" style="grid-column: 1 / -1;"></span></p>
+             <p><strong>เลขประจำตัวผู้เสียภาษี:</strong> <span id="pdf-customer-tax-id"></span></p>
+        </div>
+        <table class="pdf-items-table">
+            <thead>
+                <tr>
+                    <th style="width: 45%;">รายการ</th><th style="width: 10%;">จำนวน</th><th style="width: 10%;">หน่วย</th>
+                    <th style="width: 12%;">ราคา/หน่วย</th><th style="width: 10%;">ส่วนลด</th><th style="width: 13%;">รวมเป็นเงิน</th>
+                </tr>
+            </thead><tbody id="pdf-items-tbody"></tbody><tfoot id="pdf-summary-tfoot"></tfoot>
+        </table>
+        <footer class="pdf-footer">
+            <div class="pdf-payment-info">
+                <strong>ชำระเงินผ่าน QR Code</strong><br>
+                <img id="pdf-qr-code-img" class="pdf-qr-code" src="" alt="QR Code">
+                <p id="qr-bank-info" style="font-size: 0.8em; margin: 5px 0 0 0;"><br></p>
+            </div>
+            <div class="pdf-signature-area"><div class="signature-line"></div><p>(............................................)</p><p>ผู้รับสินค้า</p></div>
+            <div class="pdf-signature-area"><div class="signature-line"></div><p>(............................................)</p><p>ผู้รับเงิน</p></div>
+        </footer>
+    </div>
+
+<script>
+// --- การตั้งค่าเบื้องต้น และตัวแปร ---
+const { jsPDF } = window.jspdf;
+let docType = '';
+let itemCounter = 0;
+let grandTotalNumber = 0;
+
+// --- !!! การตั้งค่าที่ต้องเปลี่ยน !!! ---
+const TELEGRAM_BOT_TOKEN = '8168894246:AAEKgqX0VLKp0LrqTB1HigIK13l8bhkDIjM';
+const TELEGRAM_CHAT_ID = '8168649234';
+const PROMPTPAY_ID = '0123456789123';
+
+// --- DOM Elements ---
+const initialPage = document.getElementById('initial-page');
+const formContainer = document.getElementById('form-container');
+const docTitle = document.getElementById('doc-title');
+const addItemBtn = document.getElementById('add-item-btn');
+const itemsList = document.getElementById('items-list');
+const savePdfBtn = document.getElementById('save-pdf-btn');
+const backToMainBtn = document.getElementById('back-to-main-btn');
+const discountAmountInput = document.getElementById('discount-amount');
+const discountPercentInput = document.getElementById('discount-percent');
+const qrCodeImageInput = document.getElementById('qr-code-image');
+const qrCodeTypeSelect = document.getElementById('qr-code-type');
+const qrPreview = document.getElementById('qr-preview');
+const qrPreviewImg = document.getElementById('qr-preview-img');
+const logoUploadInput = document.getElementById('logo-upload');
+const logoUrlInput = document.getElementById('logo-url');
+const logoPreview = document.getElementById('logo-preview');
+const previewLogoImg = document.getElementById('preview-logo-img');
+
+let selectedQRImage = null;
+let selectedLogo = '';
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.action-buttons .btn').forEach(button => {
+        button.addEventListener('click', () => showForm(button.textContent.trim()));
+    });
+    addItemBtn.addEventListener('click', addItemCard);
+    itemsList.addEventListener('click', handleItemCardClick);
+    itemsList.addEventListener('input', calculateTotals);
+    discountAmountInput.addEventListener('input', () => { discountPercentInput.value = ''; calculateTotals(); });
+    discountPercentInput.addEventListener('input', () => { discountAmountInput.value = ''; calculateTotals(); });
+    savePdfBtn.addEventListener('click', generatePDF);
+    backToMainBtn.addEventListener('click', showMainPage);
+    
+    // จัดการ QR Code
+    qrCodeImageInput.addEventListener('change', handleQRImageSelect);
+    logoUploadInput.addEventListener('change', handleLogoUpload);
+    logoUrlInput.addEventListener('input', handleLogoUrl);
+});
+
+function generateDocumentNumber() {
+    const now = new Date();
+    const thaiYear = now.getFullYear() + 543;
+    const year2 = (thaiYear % 100).toString().padStart(2, '0');
+    const month2 = (now.getMonth() + 1).toString().padStart(2, '0');
+    const random8 = Math.floor(Math.random() * 1e8).toString().padStart(8, '0');
+    return `OOQ${year2}${month2}${random8}`;
+}
+
+function showMainPage() {
+    formContainer.style.display = 'none';
+    initialPage.style.display = 'block';
+    document.getElementById('customer-name').value = '';
+    document.getElementById('customer-address').value = '';
+    document.getElementById('customer-tax-id').value = '';
+    document.getElementById('document-number').value = '';
+    itemsList.innerHTML = '';
+    discountAmountInput.value = '';
+    discountPercentInput.value = '';
+    qrCodeImageInput.value = '';
+    qrPreview.style.display = 'none';
+    selectedQRImage = null;
+    logoUploadInput.value = '';
+    logoUrlInput.value = '';
+    logoPreview.style.display = 'none';
+    selectedLogo = '';
+    calculateTotals(); 
+}
+function formatCurrency(num) { return isNaN(num) ? '0.00' : num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+function handleQRImageSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        // ตรวจสอบขนาดไฟล์ (ไม่เกิน 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('ไฟล์รูปภาพใหญ่เกินไป กรุณาเลือกไฟล์ที่มีขนาดน้อยกว่า 5MB');
+            event.target.value = '';
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            selectedQRImage = e.target.result;
+            qrPreviewImg.src = selectedQRImage;
+            qrPreview.style.display = 'block';
+            
+            // แสดงข้อความแนะนำ
+            console.log('QR Code อัปโหลดสำเร็จ ขนาดไฟล์:', (file.size / 1024).toFixed(1), 'KB');
+        };
+        reader.readAsDataURL(file);
+    } else {
+        selectedQRImage = null;
+        qrPreview.style.display = 'none';
+    }
+}
+
+function handleLogoUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            selectedLogo = e.target.result;
+            previewLogoImg.src = selectedLogo;
+            logoPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    } else {
+        selectedLogo = '';
+        logoPreview.style.display = 'none';
+    }
+}
+
+function handleLogoUrl(event) {
+    const url = event.target.value.trim();
+    if (url) {
+        selectedLogo = url;
+        previewLogoImg.src = url;
+        logoPreview.style.display = 'block';
+    } else if (!logoUploadInput.value) {
+        selectedLogo = '';
+        logoPreview.style.display = 'none';
+    }
+}
+
+function showForm(type) {
+    docType = type;
+    docTitle.textContent = type;
+    initialPage.style.display = 'none';
+    formContainer.style.display = 'block';
+    window.scrollTo(0, 0);
+    if (itemsList.children.length === 0) { addItemCard(); }
+    // สร้างเลขที่เอกสารใหม่ทุกครั้งที่เปิดฟอร์ม
+    document.getElementById('document-number').value = generateDocumentNumber();
+}
+
+function addItemCard() {
+    itemCounter++;
+    const card = document.createElement('div');
+    card.className = 'item-card';
+    card.innerHTML = `
+      <div class="item-card-row item-name-row">
+        <label>รายการสินค้า</label>
+        <input type="text" class="item-name" placeholder="รายละเอียดสินค้า">
+      </div>
+      <div class="item-card-row item-qty-row">
+        <div>
+          <span class="input-label">จำนวน</span>
+          <input type="number" class="item-qty" value="1" min="0" step="any">
+        </div>
+        <div>
+          <span class="input-label">หน่วย</span>
+          <select class="item-unit">
+           <option>ถุง</option><option>กระสอบ</option><option>กิโลกรัม</option><option>ตัน</option>
+          </select>
+        </div>
+        <div>
+          <span class="input-label">ราคา/หน่วย</span>
+          <input type="number" class="item-price" placeholder="0.00" min="0" step="any">
+        </div>
+        <div>
+          <span class="input-label">ส่วนลด</span>
+          <input type="number" class="item-discount" placeholder="0.00" min="0" step="any">
+        </div>
+      </div>
+      <div class="item-card-row item-card-total-row">
+        <label>ราคารวม</label>
+        <span class="item-total">0.00</span>
+        <button type="button" class="delete-btn">ลบ</button>
+      </div>
+    `;
+    itemsList.appendChild(card);
+    calculateTotals();
+}
+
+function handleItemCardClick(event) {
+    if (event.target.classList.contains('delete-btn')) {
+        event.target.closest('.item-card').remove();
+        calculateTotals();
+    }
+}
+
+function calculateTotals() {
+    let subtotal = 0;
+    document.querySelectorAll('.item-card').forEach(card => {
+        const qty = parseFloat(card.querySelector('.item-qty').value) || 0;
+        const price = parseFloat(card.querySelector('.item-price').value) || 0;
+        const discount = parseFloat(card.querySelector('.item-discount').value) || 0;
+        const rowTotal = (qty * price) - discount;
+        card.querySelector('.item-total').textContent = formatCurrency(rowTotal);
+        subtotal += rowTotal;
+    });
+    const discountAmount = parseFloat(discountAmountInput.value) || 0;
+    const discountPercent = parseFloat(discountPercentInput.value) || 0;
+    let totalDiscount = discountAmount > 0 ? discountAmount : (subtotal * (discountPercent / 100));
+    const totalAfterDiscount = subtotal - totalDiscount;
+    const vat = 0;
+    grandTotalNumber = totalAfterDiscount;
+    document.getElementById('summary-subtotal').textContent = formatCurrency(subtotal);
+    document.getElementById('summary-discount').textContent = formatCurrency(totalDiscount);
+    document.getElementById('summary-pre-tax-total').textContent = formatCurrency(totalAfterDiscount);
+    document.getElementById('summary-vat').textContent = formatCurrency(vat);
+    document.getElementById('summary-grand-total').textContent = formatCurrency(grandTotalNumber);
+}
+
+async function generatePDF() {
+    if(savePdfBtn.disabled) return;
+    savePdfBtn.disabled = true;
+    savePdfBtn.textContent = 'กำลังสร้าง...';
+    savePdfBtn.style.transform = "translateY(2px)";
+    backToMainBtn.disabled = true;
+
+    const pdfTemplate = document.getElementById('pdf-template');
+    
+    // Populate data
+    document.getElementById('pdf-doc-title-render').textContent = docType;
+    document.getElementById('pdf-doc-date').textContent = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+    document.getElementById('pdf-document-number').textContent = document.getElementById('document-number').value || '-';
+    document.getElementById('pdf-customer-name').textContent = document.getElementById('customer-name').value || '-';
+    document.getElementById('pdf-customer-address').innerHTML = document.getElementById('customer-address').value.replace(/\n/g, '<br>') || '-';
+    document.getElementById('pdf-customer-tax-id').textContent = document.getElementById('customer-tax-id').value || '-';
+    
+    // จัดการ QR Code ใน PDF
+    const pdfQRCodeImg = document.getElementById('pdf-qr-code-img');
+    const qrBankInfo = document.getElementById('qr-bank-info');
+    
+    if (selectedQRImage) {
+        pdfQRCodeImg.src = selectedQRImage;
+        // ตั้งค่า style เพื่อให้ QR Code แสดงผลถูกต้อง
+        pdfQRCodeImg.style.width = '200px';
+        pdfQRCodeImg.style.height = '200px';
+        pdfQRCodeImg.style.objectFit = 'contain';
+        pdfQRCodeImg.style.border = '3px solid #e0e0e0';
+        pdfQRCodeImg.style.borderRadius = '12px';
+        pdfQRCodeImg.style.background = 'white';
+        pdfQRCodeImg.style.padding = '12px';
+        pdfQRCodeImg.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+        
+        qrBankInfo.innerHTML = 'QR Code<br>ชำระเงิน';
+    } else {
+        // ใช้ QR Code เริ่มต้นถ้าไม่มีการอัปโหลด
+        pdfQRCodeImg.src = '';
+        qrBankInfo.innerHTML = 'PromptPay<br>ชำระเงิน';
+    }
+    
+    // โลโก้ใน PDF
+    const pdfLogoImg = document.getElementById('pdf-logo-img');
+    if (selectedLogo) {
+        pdfLogoImg.src = selectedLogo;
+        pdfLogoImg.style.display = 'block';
+    } else {
+        pdfLogoImg.src = '';
+        pdfLogoImg.style.display = 'none';
+    }
+
+    const pdfItemsTbody = document.getElementById('pdf-items-tbody');
+    pdfItemsTbody.innerHTML = ''; 
+    document.querySelectorAll('.item-card').forEach(card => {
+        const newRow = pdfItemsTbody.insertRow();
+        const nameInput = card.querySelector('.item-name');
+        const qtyInput = card.querySelector('.item-qty');
+        const unitSelect = card.querySelector('.item-unit');
+        const priceInput = card.querySelector('.item-price');
+        const discountInput = card.querySelector('.item-discount');
+        const totalSpan = card.querySelector('.item-total');
+
+        newRow.innerHTML = `<td>${nameInput.value||'-'}</td><td>${formatCurrency(parseFloat(qtyInput.value||0))}</td><td>${unitSelect.value||'-'}</td><td>${formatCurrency(parseFloat(priceInput.value||0))}</td><td>${formatCurrency(parseFloat(discountInput.value||0))}</td><td>${totalSpan.textContent}</td>`;
+    });
+    document.getElementById('pdf-summary-tfoot').innerHTML = `<tr><td colspan="5">รวมเป็นเงิน</td><td>${document.getElementById('summary-subtotal').textContent}</td></tr><tr><td colspan="5">ส่วนลด</td><td>${document.getElementById('summary-discount').textContent}</td></tr><tr><td colspan="5">ยอดคงเหลือ (ก่อนภาษีมูลค่าเพิ่ม)</td><td>${document.getElementById('summary-pre-tax-total').textContent}</td></tr><tr><td colspan="5">ภาษีมูลค่าเพิ่ม 7%</td><td>${document.getElementById('summary-vat').textContent}</td></tr><tr class="grand-total-pdf"><td colspan="5">ยอดรวมสุทธิ</td><td>${document.getElementById('summary-grand-total').textContent}</td></tr>`;
+
+    pdfTemplate.style.display = 'block';
+
+    try {
+        // รอให้รูปภาพโหลดเสร็จก่อนสร้าง PDF
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const canvas = await html2canvas(pdfTemplate, {
+            scale: 2.5,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: true,
+            // รอให้รูปภาพโหลดเสร็จก่อนสร้าง canvas
+            onclone: (clonedDoc) => {
+                const images = clonedDoc.querySelectorAll('#pdf-template img');
+                const promises = [];
+                images.forEach(img => {
+                    if (img.src && !img.complete) {
+                        promises.push(new Promise((resolve, reject) => {
+                            img.onload = () => {
+                                console.log('Image loaded successfully:', img.src);
+                                resolve();
+                            };
+                            img.onerror = () => {
+                                console.error('Image failed to load for canvas:', img.src);
+                                resolve(); // Resolve anyway to not break the PDF generation
+                            };
+                        }));
+                    }
+                });
+                return Promise.all(promises);
+            }
+        });
+        
+        pdfTemplate.style.display = 'none';
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+        const pdfBlob = pdf.output('blob');
+        const fileName = `${docType.replace(/[\/ ]/g, '_')}_${Date.now()}.pdf`;
+        const formData = new FormData();
+        formData.append('chat_id', TELEGRAM_CHAT_ID);
+        formData.append('document', pdfBlob, fileName);
+        const customerName = document.getElementById('customer-name').value;
+        formData.append('caption', `เอกสาร: ${docType}\nลูกค้า: ${customerName||'N/A'}\nยอดรวม: ${formatCurrency(grandTotalNumber)} บาท`);
+
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: formData });
+        const result = await response.json();
+
+        if (response.ok) {
+            alert('สร้างและส่ง PDF ไปยัง Telegram เรียบร้อยแล้ว!');
+            // ไม่ต้องบันทึกไฟล์ลงอุปกรณ์
+        } else {
+            console.error('Failed to send PDF to Telegram:', result);
+            alert(`เกิดข้อผิดพลาดในการส่งไฟล์ไป Telegram: ${result.description}\n\n(คุณยังสามารถดาวน์โหลดไฟล์ลงเครื่องได้)`);
+            // pdf.save(fileName); // ไม่ต้องบันทึกไฟล์ลงอุปกรณ์
+        }
+    } catch (error) {
+        console.error("Error during PDF generation:", error);
+        alert(`เกิดข้อผิดพลาดรุนแรงระหว่างสร้าง PDF: ${error.message}`);
+    } finally {
+        savePdfBtn.disabled = false;
+        savePdfBtn.textContent = 'สร้าง PDF และส่ง Telegram';
+        savePdfBtn.style.transform = "translateY(0)";
+        backToMainBtn.disabled = false;
+        showMainPage();
+    }
+}
+</script>
+
+</body>
+</html>
