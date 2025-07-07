@@ -462,25 +462,14 @@
                 </div>
             </div>
             <div class="card">
-                <h3 class="form-section-title">QR Code PromptPay</h3>
-                <div class="form-grid">
-                    <label for="qr-code-image">รูปภาพ QR Code:</label>
-                    <input type="file" id="qr-code-image" accept="image/*" style="padding: 8px;">
-                    </select>
-                </div>
-                <div id="qr-preview" style="margin-top: 15px; text-align: center; display: none;">
-                    <img id="qr-preview-img" style="width: 250px; height: 250px; object-fit: contain; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 3px solid #e0e0e0; background: white; padding: 12px;">
-                    <p style="margin-top: 12px; font-size: 1em; color: #666; font-weight: 500;">QR Code ที่เลือก (ขนาดจริงที่ใช้ใน PDF)</p>
-                </div>
-            </div>
-            <div class="card">
                 <h3 class="form-section-title">โลโก้บริษัท (สำหรับ PDF)</h3>
+                <p style="color:#b71c1c;font-size:0.98em;margin:0 0 10px 0;">* กรุณาอัปโหลดโลโก้บริษัทก่อนสร้าง PDF</p>
                 <div class="form-grid">
                     <label for="logo-upload">อัปโหลดโลโก้:</label>
                     <input type="file" id="logo-upload" accept="image/*" style="padding: 8px;">
                 </div>
                 <div id="logo-preview" style="margin-top: 15px; text-align: center; display: none;">
-                    <img id="preview-logo-img" style="max-width: 120px; max-height: 120px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #e0e0e0; background: white; padding: 8px;">
+                    <img id="preview-logo-img" style="max-width: 120px; max-height: 120px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #e0e0e0;">
                     <p style="margin-top: 8px; font-size: 0.9em; color: #666;">โลโก้ที่จะแสดงใน PDF</p>
                 </div>
             </div>
@@ -490,26 +479,27 @@
                 <button id="add-item-btn" class="btn btn-yellow" style="margin-top: 20px; width:100%;">+ เพิ่มรายการ</button>
             </div>
             <div class="summary-section">
-                <div class="card discount-inputs">
-                    <h3 class="form-section-title">ส่วนลดท้ายบิล</h3>
-                    <div class="form-grid">
-                        <label for="discount-amount">ส่วนลด (บาท):</label>
-                        <input type="number" id="discount-amount" placeholder="0.00" min="0" step="any">
-                        <label for="discount-percent">ส่วนลด (%):</label>
-                        <input type="number" id="discount-percent" placeholder="0" min="0" max="100" step="any">
-                    </div>
-                </div>
                 <div class="card totals-display">
                     <h3 class="form-section-title">สรุปยอด</h3>
                     <table>
                         <tbody>
                             <tr><td>ราคารวม</td><td id="summary-subtotal">0.00</td></tr>
-                            <tr><td>ส่วนลดท้ายบิล</td><td id="summary-discount">0.00</td></tr>
-                            <tr><td>ยอดหลังหักส่วนลด</td><td id="summary-pre-tax-total">0.00</td></tr>
-                            <tr><td>ภาษีมูลค่าเพิ่ม 7%</td><td id="summary-vat">0.00</td></tr>
+                            <tr><td>จำนวนรายการทั้งหมด</td><td id="summary-item-count">0</td></tr>
                             <tr class="grand-total"><td>ยอดชำระทั้งสิ้น</td><td id="summary-grand-total">0.00</td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="form-section-title">QR Code PromptPay</h3>
+                <p style="color:#b71c1c;font-size:0.98em;margin:0 0 10px 0;">* กรุณาอัปโหลด QR Code ก่อนสร้าง PDF</p>
+                <div class="form-grid">
+                    <label for="qr-code-image">รูปภาพ QR Code:</label>
+                    <input type="file" id="qr-code-image" accept="image/*" style="padding: 8px;">
+                </div>
+                <div id="qr-preview" style="margin-top: 15px; text-align: center; display: none;">
+                    <img id="qr-preview-img" style="width: 250px; height: 250px; object-fit: contain; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 3px solid #e0e0e0;">
+                    <p style="margin-top: 12px; font-size: 1em; color: #666; font-weight: 500;">QR Code ที่เลือก (ขนาดจริงที่ใช้ใน PDF)</p>
                 </div>
             </div>
             <div class="final-actions">
@@ -574,14 +564,10 @@ const addItemBtn = document.getElementById('add-item-btn');
 const itemsList = document.getElementById('items-list');
 const savePdfBtn = document.getElementById('save-pdf-btn');
 const backToMainBtn = document.getElementById('back-to-main-btn');
-const discountAmountInput = document.getElementById('discount-amount');
-const discountPercentInput = document.getElementById('discount-percent');
 const qrCodeImageInput = document.getElementById('qr-code-image');
-const qrCodeTypeSelect = document.getElementById('qr-code-type');
 const qrPreview = document.getElementById('qr-preview');
 const qrPreviewImg = document.getElementById('qr-preview-img');
 const logoUploadInput = document.getElementById('logo-upload');
-const logoUrlInput = document.getElementById('logo-url');
 const logoPreview = document.getElementById('logo-preview');
 const previewLogoImg = document.getElementById('preview-logo-img');
 
@@ -595,15 +581,22 @@ document.addEventListener('DOMContentLoaded', () => {
     addItemBtn.addEventListener('click', addItemCard);
     itemsList.addEventListener('click', handleItemCardClick);
     itemsList.addEventListener('input', calculateTotals);
-    discountAmountInput.addEventListener('input', () => { discountPercentInput.value = ''; calculateTotals(); });
-    discountPercentInput.addEventListener('input', () => { discountAmountInput.value = ''; calculateTotals(); });
-    savePdfBtn.addEventListener('click', generatePDF);
+    savePdfBtn.addEventListener('click', () => {
+        // ตรวจสอบว่ามีการอัปโหลด QR Code และโลโก้บริษัทหรือยัง
+        if (!selectedQRImage) {
+            alert('กรุณาอัปโหลด QR Code ก่อนสร้าง PDF');
+            return;
+        }
+        if (!selectedLogo) {
+            alert('กรุณาอัปโหลดโลโก้บริษัทก่อนสร้าง PDF');
+            return;
+        }
+        generatePDF();
+    });
     backToMainBtn.addEventListener('click', showMainPage);
-    
     // จัดการ QR Code
     qrCodeImageInput.addEventListener('change', handleQRImageSelect);
     logoUploadInput.addEventListener('change', handleLogoUpload);
-    logoUrlInput.addEventListener('input', handleLogoUrl);
 });
 
 function generateDocumentNumber() {
@@ -623,13 +616,10 @@ function showMainPage() {
     document.getElementById('customer-tax-id').value = '';
     document.getElementById('document-number').value = '';
     itemsList.innerHTML = '';
-    discountAmountInput.value = '';
-    discountPercentInput.value = '';
     qrCodeImageInput.value = '';
     qrPreview.style.display = 'none';
     selectedQRImage = null;
     logoUploadInput.value = '';
-    logoUrlInput.value = '';
     logoPreview.style.display = 'none';
     selectedLogo = '';
     calculateTotals(); 
@@ -678,18 +668,6 @@ function handleLogoUpload(event) {
     }
 }
 
-function handleLogoUrl(event) {
-    const url = event.target.value.trim();
-    if (url) {
-        selectedLogo = url;
-        previewLogoImg.src = url;
-        logoPreview.style.display = 'block';
-    } else if (!logoUploadInput.value) {
-        selectedLogo = '';
-        logoPreview.style.display = 'none';
-    }
-}
-
 function showForm(type) {
     docType = type;
     docTitle.textContent = type;
@@ -727,7 +705,10 @@ function addItemCard() {
         </div>
         <div>
           <span class="input-label">ส่วนลด</span>
-          <input type="number" class="item-discount" placeholder="0.00" min="0" step="any">
+          <div style="display:flex;gap:4px;align-items:center;">
+            <input type="number" class="item-discount-baht" placeholder="บาท" min="0" step="any" style="width:60px;">
+            <input type="number" class="item-discount-percent" placeholder="%" min="0" max="100" step="any" style="width:50px;">
+          </div>
         </div>
       </div>
       <div class="item-card-row item-card-total-row">
@@ -738,6 +719,15 @@ function addItemCard() {
     `;
     itemsList.appendChild(card);
     calculateTotals();
+    // --- ใน addItemCard() ให้เพิ่ม event input เพื่อให้กรอกได้ช่องเดียว ---
+    card.querySelector('.item-discount-baht').addEventListener('input', function() {
+      if (this.value) card.querySelector('.item-discount-percent').value = '';
+      calculateTotals();
+    });
+    card.querySelector('.item-discount-percent').addEventListener('input', function() {
+      if (this.value) card.querySelector('.item-discount-baht').value = '';
+      calculateTotals();
+    });
 }
 
 function handleItemCardClick(event) {
@@ -749,24 +739,26 @@ function handleItemCardClick(event) {
 
 function calculateTotals() {
     let subtotal = 0;
+    let itemCount = 0;
     document.querySelectorAll('.item-card').forEach(card => {
         const qty = parseFloat(card.querySelector('.item-qty').value) || 0;
         const price = parseFloat(card.querySelector('.item-price').value) || 0;
-        const discount = parseFloat(card.querySelector('.item-discount').value) || 0;
-        const rowTotal = (qty * price) - discount;
+        const discountBaht = parseFloat(card.querySelector('.item-discount-baht').value) || 0;
+        const discountPercent = parseFloat(card.querySelector('.item-discount-percent').value) || 0;
+        let rowDiscount = 0;
+        if (discountPercent > 0) {
+            rowDiscount = (qty * price) * (discountPercent / 100);
+        } else {
+            rowDiscount = discountBaht;
+        }
+        const rowTotal = (qty * price) - rowDiscount;
         card.querySelector('.item-total').textContent = formatCurrency(rowTotal);
         subtotal += rowTotal;
+        itemCount++;
     });
-    const discountAmount = parseFloat(discountAmountInput.value) || 0;
-    const discountPercent = parseFloat(discountPercentInput.value) || 0;
-    let totalDiscount = discountAmount > 0 ? discountAmount : (subtotal * (discountPercent / 100));
-    const totalAfterDiscount = subtotal - totalDiscount;
-    const vat = 0;
-    grandTotalNumber = totalAfterDiscount;
+    grandTotalNumber = subtotal;
     document.getElementById('summary-subtotal').textContent = formatCurrency(subtotal);
-    document.getElementById('summary-discount').textContent = formatCurrency(totalDiscount);
-    document.getElementById('summary-pre-tax-total').textContent = formatCurrency(totalAfterDiscount);
-    document.getElementById('summary-vat').textContent = formatCurrency(vat);
+    document.getElementById('summary-item-count').textContent = itemCount;
     document.getElementById('summary-grand-total').textContent = formatCurrency(grandTotalNumber);
 }
 
@@ -828,18 +820,24 @@ async function generatePDF() {
         const qtyInput = card.querySelector('.item-qty');
         const unitSelect = card.querySelector('.item-unit');
         const priceInput = card.querySelector('.item-price');
-        const discountInput = card.querySelector('.item-discount');
-        const totalSpan = card.querySelector('.item-total');
-
-        newRow.innerHTML = `<td>${nameInput.value||'-'}</td><td>${formatCurrency(parseFloat(qtyInput.value||0))}</td><td>${unitSelect.value||'-'}</td><td>${formatCurrency(parseFloat(priceInput.value||0))}</td><td>${formatCurrency(parseFloat(discountInput.value||0))}</td><td>${totalSpan.textContent}</td>`;
+        const discountBaht = parseFloat(card.querySelector('.item-discount-baht').value) || 0;
+        const discountPercent = parseFloat(card.querySelector('.item-discount-percent').value) || 0;
+        let rowDiscount = 0;
+        if (discountPercent > 0) {
+            rowDiscount = (parseFloat(qtyInput.value||0) * parseFloat(priceInput.value||0)) * (discountPercent / 100);
+        } else {
+            rowDiscount = discountBaht;
+        }
+        const rowTotal = (parseFloat(qtyInput.value||0) * parseFloat(priceInput.value||0)) - rowDiscount;
+        newRow.innerHTML = `<td>${nameInput.value||'-'}</td><td>${formatCurrency(parseFloat(qtyInput.value||0))}</td><td>${unitSelect.value||'-'}</td><td>${formatCurrency(parseFloat(priceInput.value||0))}</td><td>${discountPercent>0?discountPercent+'%':discountBaht>0?formatCurrency(discountBaht)+'฿':'0.00'}</td><td>${formatCurrency(rowTotal)}</td>`;
     });
-    document.getElementById('pdf-summary-tfoot').innerHTML = `<tr><td colspan="5">รวมเป็นเงิน</td><td>${document.getElementById('summary-subtotal').textContent}</td></tr><tr><td colspan="5">ส่วนลด</td><td>${document.getElementById('summary-discount').textContent}</td></tr><tr><td colspan="5">ยอดคงเหลือ (ก่อนภาษีมูลค่าเพิ่ม)</td><td>${document.getElementById('summary-pre-tax-total').textContent}</td></tr><tr><td colspan="5">ภาษีมูลค่าเพิ่ม 7%</td><td>${document.getElementById('summary-vat').textContent}</td></tr><tr class="grand-total-pdf"><td colspan="5">ยอดรวมสุทธิ</td><td>${document.getElementById('summary-grand-total').textContent}</td></tr>`;
+    document.getElementById('pdf-summary-tfoot').innerHTML = `<tr><td colspan="5">รวมเป็นเงิน</td><td>${document.getElementById('summary-subtotal').textContent}</td></tr><tr><td colspan="5">จำนวนรายการ</td><td>${document.getElementById('summary-item-count').textContent}</td></tr><tr class="grand-total-pdf"><td colspan="5">ยอดรวมสุทธิ</td><td>${document.getElementById('summary-grand-total').textContent}</td></tr>`;
 
     pdfTemplate.style.display = 'block';
 
     try {
         // รอให้รูปภาพโหลดเสร็จก่อนสร้าง PDF
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         const canvas = await html2canvas(pdfTemplate, {
             scale: 2.5,
@@ -878,12 +876,28 @@ async function generatePDF() {
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
         const pdfBlob = pdf.output('blob');
-        const fileName = `${docType.replace(/[\/ ]/g, '_')}_${Date.now()}.pdf`;
+        // ตั้งชื่อไฟล์ PDF เป็น ชื่อเอกสาร_เลขที่เอกสาร.pdf
+        const docNumber = document.getElementById('document-number').value || '';
+        const fileName = `${docType.replace(/[\/ ]/g, '_')}_${docNumber}.pdf`;
         const formData = new FormData();
         formData.append('chat_id', TELEGRAM_CHAT_ID);
         formData.append('document', pdfBlob, fileName);
         const customerName = document.getElementById('customer-name').value;
-        formData.append('caption', `เอกสาร: ${docType}\nลูกค้า: ${customerName||'N/A'}\nยอดรวม: ${formatCurrency(grandTotalNumber)} บาท`);
+        const docDate = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+        const customerAddress = document.getElementById('customer-address').value;
+        const customerTaxId = document.getElementById('customer-tax-id').value;
+        const itemCount = document.getElementById('summary-item-count').textContent;
+        const grandTotal = formatCurrency(grandTotalNumber);
+        formData.append('caption',
+          `เอกสาร: ${docType}\n` +
+          `เลขที่: ${docNumber}\n` +
+          `วันที่: ${docDate}\n` +
+          `ลูกค้า: ${customerName || '-'}\n` +
+          `ที่อยู่: ${customerAddress || '-'}\n` +
+          `เลขผู้เสียภาษี: ${customerTaxId || '-'}\n` +
+          `จำนวนรายการ: ${itemCount}\n` +
+          `ยอดรวมสุทธิ: ${grandTotal} บาท`
+        );
 
         const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument`, { method: 'POST', body: formData });
         const result = await response.json();
