@@ -322,8 +322,8 @@
                     <tr>
                         <th style="width: 45%;">รายการ</th>
                         <th class="text-right" style="width: 10%;">จำนวน</th>
-                        <th style="width: 10%;">หน่วย</th>
-                        <th class="text-right" style="width: 12%;">ราคา/หน่วย</th>
+                        <th style="width: 10%;"></th>
+                        <th class="text-right" style="width: 12%;">ราคา/</th>
                         <th class="text-right" style="width: 10%;">ส่วนลด</th>
                         <th class="text-right" style="width: 13%;">รวมเป็นเงิน</th>
                     </tr>
@@ -477,7 +477,7 @@ const TELEGRAM_CHAT_ID = '-1002778171481';
     function addItemCard() {
         const card = document.createElement('div');
         card.className = 'item-card';
-        card.innerHTML = `<div class="item-card-row"><label>รายการสินค้า</label><input type="text" class="item-name" placeholder="รายละเอียดสินค้า"></div><div class="item-card-row"><div><label>จำนวน</label><input type="number" class="item-qty" value="1" min="0" step="any"></div><div><label></label><select class="item-unit"><option>ถุง</option><option>กระสอบ</option><option>ชิ้น</option><option>อัน</option><option>กิโลกรัม</option><option>ตัน</option></select></div><div><label>ราคา/หน่วย</label><input type="number" class="item-price" placeholder="0.00" min="0" step="any"></div><div><label>ส่วนลด (บาท)</label><input type="number" class="item-discount-baht" placeholder="0.00" min="0" step="any"></div></div><div class="item-card-row item-card-total-row"><label>ราคารวม</label><span class="item-total">0.00</span><button type="button" class="delete-btn">ลบ</button></div>`;
+        card.innerHTML = `<div class="item-card-row"><label>รายการสินค้า</label><input type="text" class="item-name" placeholder="รายละเอียดสินค้า"></div><div class="item-card-row"><div><label>จำนวน</label><input type="number" class="item-qty" value="1" min="0" step="any"></div><div><label></label><select class="item-unit"><option>ถุง</option><option>กระสอบ</option><option>ชิ้น</option><option>อัน</option><option>กิโลกรัม</option><option>กล่อง</option><option>ตัน</option></select></div><div><label>ราคา/หน่วย</label><input type="number" class="item-price" placeholder="0.00" min="0" step="any"></div><div><label>ส่วนลด (บาท)</label><input type="number" class="item-discount-baht" placeholder="0.00" min="0" step="any"></div></div><div class="item-card-row item-card-total-row"><label>ราคารวม</label><span class="item-total">0.00</span><button type="button" class="delete-btn">ลบ</button></div>`;
         itemsList.appendChild(card);
         calculateTotals();
     }
